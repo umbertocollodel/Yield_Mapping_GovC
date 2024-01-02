@@ -1,0 +1,258 @@
+
+R version 3.5.2 (2018-12-20) -- "Eggshell Igloo"
+Copyright (C) 2018 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> ################################################################################
+> ## This file is part of the replication suite  of
+> ## "Measuring Euro Area Monetary Policy"
+> ## By Carlo Altavilla, Luca Brugnolini, Refet S. Gürkaynak, Roberto Motto, and
+> ## Giuseppe Ragusa
+> ##
+> ## This file produces the data used for factor extraction and rotation
+> ##
+> ################################################################################
+> 
+> 
+> 
+> ##---------------------- Hyperparameters  -------------------------------------
+>   start_from <- "2001-12-31"
+>   last_dates <- "2018-09-13"
+>   
+>   if (!require("pacman", quietly = TRUE))
++     install.packages("pacman", repos = "cran.rstudio.com")
+>   
+>   ##---------------------- Load Packages  ---------------------------------------
+>   pacman::p_load(tidyverse, 
++                  readxl, 
++                  grid, 
++                  gridExtra, 
++                  sandwich, 
++                  zoo,
++                  lubridate, 
++                  stargazer, 
++                  lme4, 
++                  stringr, 
++                  reshape2, 
++                  forcats,
++                  lmtest,
++                  rprojroot,
++                  rstudioapi,
++                  Hmisc, install = TRUE, update = F)
+>   
+>   ##---------------------- Setup path  ------------------------------------------
+>   
+>   base_path <- read_lines("dir.conf")
+>   
+>   
+>   ##-----------------------------------------------------------------------------
+>   ## DON'T CHANGE THIS
+>   
+>   r_path <- paste0(base_path, "/code/rcode/")
+>   j_path <- paste0(base_path, "/code/jcode/")
+>   s_path <- paste0(base_path, "/raw_data/")
+>   d_path <- paste0(base_path, "/data/")
+>   
+>   print(r_path)
+[1] "/Users/gragusa/Dropbox/measuring_ea_monetary_policy_shock/replication_files/code/rcode/"
+>   print(j_path)
+[1] "/Users/gragusa/Dropbox/measuring_ea_monetary_policy_shock/replication_files/code/jcode/"
+>   print(s_path)
+[1] "/Users/gragusa/Dropbox/measuring_ea_monetary_policy_shock/replication_files/raw_data/"
+>   ##--------------------- Helper function  --------------------------------------
+>  
+>   select_eampd_assets <- function(x,date){
++     x %>% 
++       select(Date, ends_with("_smed")) %>% 
++       rename_all(. %>% gsub("_smed", "", .)) %>% 
++       as.tbl %>% filter(!(Date %in% exclude_date))
++   }
+>   
+>   ## ----------- Date Exclusions ------------------------------------------------
+>   exclude_date <- as_date(c("2001-09-17",  ## September eleven
++                             "2008-10-08",  ## Rate cut 50% all banks (outlier)
++                             "2008-11-06"   ## ADD DESCRIPTION ##
++   ))
+>   
+>   ## ----------- Load surprises -------------------------------------------------
+>   
+>   #
+>   eampd_r <- read_xlsx(paste0(s_path,"00EA_MPD_update_may2019.xlsx"), sheet = 1) %>%
++     mutate(Date = as.Date(date))
+>   eampd_c <- read_xlsx(paste0(s_path,"00EA_MPD_update_may2019.xlsx"), sheet = 2) %>%
++     mutate(Date = as.Date(date))
+>   eampd_m <- read_xlsx(paste0(s_path,"00EA_MPD_update_may2019.xlsx"), sheet = 3) %>%
++     mutate(Date = as.Date(date))
+>   
+>   # OIS
+>   rois_rel  <- eampd_r %>% select("Date", starts_with("OIS")) 
+>   rois_con  <- eampd_c %>% select("Date", starts_with("OIS")) 
+>   rois_tot  <- eampd_m %>% select("Date", starts_with("OIS")) 
+>   
+>   # Bond
+>   rbund_rel <- eampd_r %>% select("Date", starts_with("DE")) 
+>   rbund_con <- eampd_c %>% select("Date", starts_with("DE"))
+>   rbund_tot <- eampd_m %>% select("Date", starts_with("DE"))
+>   
+>   # Bund
+>   rbond_rel <- eampd_r %>% select("Date", starts_with("IT"),starts_with("FR"),starts_with("ES"))
+>   rbond_con <- eampd_c %>% select("Date", starts_with("IT"),starts_with("FR"),starts_with("ES"))
+>   rbond_tot <- eampd_m %>% select("Date", starts_with("IT"),starts_with("FR"),starts_with("ES"))
+>   
+>   ## ---- Manual cleaning ---  
+>   ## 2-Feb-2000 in ois release, 200bp change in some assets 
+>   #rois_rel[rois_rel$Date == as.Date("2000-02-17"),] c(4,5, 6, 7, 12, 13)] <- 0 
+>   ## ADDING 12 ##
+>   #rois_tot[rois_rel$Date == as.Date("2000-02-17"), c(4,5, 6, 7, 12, 13)] <- 0 
+>   ## ADDING 12 ##
+>   
+>   ## ---- select only median market-based surprises and clean dates  ------------
+>   
+>   ois_rel <- select_eampd_assets(rois_rel,exclude_date)
+>   ois_con <- select_eampd_assets(rois_con,exclude_date)
+>   ois_tot <- select_eampd_assets(rois_tot,exclude_date)
+>   
+>   bond_rel <- select_eampd_assets(rbond_rel,exclude_date)
+>   bond_con <- select_eampd_assets(rbond_con,exclude_date)
+>   bond_tot <- select_eampd_assets(rbond_tot,exclude_date)
+>   
+>   bund_rel <- select_eampd_assets(rbund_rel,exclude_date)
+>   bund_con <- select_eampd_assets(rbund_con,exclude_date)
+>   bund_tot <- select_eampd_assets(rbund_tot,exclude_date)
+>   
+>   ## ---- Variables for factors extractions ------------------------------------
+>   
+>   #  ---- Release --------------------------------------------------------------
+>   Zrel <- ois_rel %>% 
++     select(Date,  OIS_1M, OIS_3M, OIS_6M, OIS_1Y, OIS_2Y) %>% 
++     filter(Date <= as.Date(last_dates))
+>   OIS <- ois_rel %>%
++     filter(Date >= as.Date("2011-08-04")) %>% 
++     select(Date, OIS_5Y, OIS_10)
+>   DEU <- bund_rel %>%
++     filter(Date < as.Date("2011-08-04")) %>% 
++     select(Date, DE5Y, DE10)
+>   
+>   names(Zrel) <- sub("OIS_", "", names(Zrel))
+>   names(OIS) <- sub("OIS_", "", names(OIS))
+>   names(DEU) <- sub("DE", "", names(DEU))
+>   names(DEU) <- sub("10", "10Y", names(DEU))
+>   names(OIS) <- sub("10", "10Y", names(OIS))
+>   
+>   Yrel <- bind_rows(DEU, OIS) 
+>   X_rel <- inner_join(Zrel, Yrel, by = "Date") %>% na.omit
+>   rm(Zrel, OIS, DEU, Yrel)
+>   
+>   #  ---- Conference ------------------------------------------------------------
+>   
+>   Zcon <- ois_con %>% select(Date, OIS_1M, OIS_3M, OIS_6M, OIS_1Y, OIS_2Y) %>% 
++     filter(Date <= as.Date(last_dates))
+>   
+>   OIS <- ois_con %>% filter(Date >= as.Date("2011-08-04")) %>% 
++     select(Date, OIS_5Y, OIS_10)
+>   DEU <- bund_con %>% filter(Date < as.Date("2011-08-04")) %>% 
++     select(Date, DE5Y, DE10)
+>   
+>   names(Zcon) <- sub("OIS_", "", names(Zcon))
+>   names(OIS) <- sub("OIS_", "", names(OIS))
+>   names(DEU) <- sub("DE", "", names(DEU))
+>   names(DEU)<- sub("10", "10Y", names(DEU))
+>   names(OIS)<- sub("10", "10Y", names(OIS))
+>   
+>   Ycon <- bind_rows(DEU, OIS)
+>   X_con <- inner_join(Zcon, Ycon , by = "Date") %>% na.omit
+>   rm(Zcon, OIS, DEU, Ycon)
+>   
+>   #  ---- Monetary  ------------------------------------------------------------- 
+>   
+>   Ztot <- ois_tot %>%
++     select(Date, OIS_1M, OIS_3M, OIS_6M, OIS_1Y, OIS_2Y) %>%
++     filter(Date <= as.Date(last_dates))
+>   OIS <- ois_tot %>% filter(Date >= as.Date("2011-08-04")) %>% 
++     select(Date, Date, OIS_5Y, OIS_10)
+>   DEU <- bund_tot %>% filter(Date < as.Date("2011-08-04")) %>% 
++     select(Date, DE5Y, DE10)
+>   
+>   names(Ztot) <- sub("OIS_", "", names(Ztot)) 
+>   names(OIS) <- sub("OIS_", "", names(OIS))
+>   names(OIS) <- sub("10", "10Y", names(OIS))
+>   names(DEU) <- sub("DE", "", names(DEU))
+>   names(DEU) <- sub("10", "10Y", names(DEU))
+>   
+>   Y_tot <- bind_rows(DEU, OIS)
+>   X_tot <- inner_join(Ztot, Y_tot, by = "Date") %>% na.omit
+>   rm(Ztot, OIS, DEU, Y_tot)
+>   ## ---- Decide how many asset to keep for extracting factors ------------------
+>   
+>   Xrel <- X_rel %>%
++     filter(Date >= start_from) %>%
++     select(-Date) %>%
++     as.matrix()
+>   
+>   Drel <- X_rel %>% 
++     filter(Date >= start_from) %>% 
++     pull(Date) %>% 
++     as.character()
+>   
+>   Xcon <- X_con %>%
++     filter(Date >= start_from) %>%
++     select(-Date) %>%
++     as.matrix()
+>   
+>   Dcon <- X_con %>% 
++     filter(Date >= start_from) %>% 
++     pull(Date) %>% 
++     as.character()
+>   
+>   X_con <- X_con %>% filter(Date >= start_from)
+>   X_rel <- X_rel %>% filter(Date >= start_from)
+>   X_tot <- X_tot %>% filter(Date >= start_from)
+>   
+>   write.table(
++     Xrel,
++     paste0(d_path, "Xrel.csv"),
++     sep = ",",
++     col.names = F,
++     row.names = F
++   )
+>   write.table(
++     Xcon,
++     paste0(d_path, "Xcon.csv"),
++     sep = ",",
++     col.names = F,
++     row.names = F
++   )
+>   write.table(
++     Drel,
++     paste0(d_path, "Drel.csv"),
++     sep = ",",
++     col.names = F,
++     row.names = F
++   )
+>   write.table(
++     Dcon,
++     paste0(d_path, "Dcon.csv"),
++     sep = ",",
++     col.names = F,
++     row.names = F
++   )
+> 
+> proc.time()
+   user  system elapsed 
+  2.438   0.360   3.220 

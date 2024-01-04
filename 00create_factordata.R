@@ -70,7 +70,7 @@
   
   ## ----------- Load raw data -------------------------------------------------
   
-  #
+  # Press Release, Conference and whole monetary statement
   eampd_r <- read_xlsx(paste0(s_path,"00EA_MPD_update_july2023.xlsx"), sheet = 2) %>%
     mutate(Date = as.Date(date))
   eampd_c <- read_xlsx(paste0(s_path,"00EA_MPD_update_july2023.xlsx"), sheet = 3) %>%
@@ -83,12 +83,12 @@
   rois_con  <- eampd_c %>% select("date", starts_with("OIS")) 
   rois_tot  <- eampd_m %>% select("date", starts_with("OIS")) 
   
-  # Bond
+  # Bund
   rbund_rel <- eampd_r %>% select("date", starts_with("DE")) 
   rbund_con <- eampd_c %>% select("date", starts_with("DE"))
   rbund_tot <- eampd_m %>% select("date", starts_with("DE"))
   
-  # Bund
+  # Bond
   rbond_rel <- eampd_r %>% select("date", starts_with("IT"),starts_with("FR"),starts_with("ES"))
   rbond_con <- eampd_c %>% select("date", starts_with("IT"),starts_with("FR"),starts_with("ES"))
   rbond_tot <- eampd_m %>% select("date", starts_with("IT"),starts_with("FR"),starts_with("ES"))
@@ -257,36 +257,5 @@
   )
   
   
-  
-  ## ----  Some random event study graph  ------
-  
-  
-  spread_rel %>% 
-    as_tibble() %>%
-    mutate(date =Drel_spread) %>% 
-    rowid_to_column() %>% 
-    pivot_longer(ends_with("Y"),names_to = "spreads") %>% 
-    ggplot(aes(date,value, group=spreads,col=spreads)) +
-    geom_line() +
-    theme_minimal() +
-    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-  
-  
-  spread %>% 
-    cor()
 
-  
-  
-
-  
-  spread_rel %>% 
-    cbind(Drel_spread) %>% 
-    as_tibble() %>% 
-    pivot_longer(ends_with("10Y")) %>% 
-    mutate(value = as.numeric(value)) %>%
-    filter(year(Drel_spread) >= 2010) %>% 
-    ggplot(aes(Drel_spread,value, col=name, group=name)) +
-    geom_line() +
-    theme_minimal() +
-    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
     

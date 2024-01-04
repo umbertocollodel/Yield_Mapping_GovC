@@ -39,6 +39,7 @@
                  forcats,
                  broom,
                  ggtext,
+                 shiny,
                  install = TRUE, update = F)
   
   ##---------------------- Setup path  ------------------------------------------

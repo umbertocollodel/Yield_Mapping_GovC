@@ -40,6 +40,8 @@
                  broom,
                  ggtext,
                  shiny,
+                 shinydashboard,
+                 leaflet,
                  install = TRUE, update = F)
   
   ##---------------------- Setup path  ------------------------------------------

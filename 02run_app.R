@@ -21,14 +21,16 @@ server <- function(input, output, session) {
  
    # Clean for time serie plotting
   
-  df_app <- reactive({time_serie_df %>% 
-    filter(id %in% input$time) %>% 
-    filter(date >= input$dateRange[1] & date <= input$dateRange[2])})
-    
+  dfInput <- reactive({time_serie_df %>% 
+    filter(id %in% input$time)})
+    #filter(date >= as.character(input$dateRange[1]) & date <= as.character(input$dateRange[2])) %>% 
+
   # Plot:
   
   
-  output$plot1 <- renderPlot({time_serie_df %>% 
+  output$plot1 <- renderPlot({
+    df1 <- dfInput()
+    df1 %>% 
     ggplot(aes(date,value, fill=Factor)) +
     geom_col(width = 0.5) +
     labs(title="",

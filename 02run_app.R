@@ -5,10 +5,12 @@ ui <- pageWithSidebar(
   headerPanel('ECB Monetary Surprises'),
   sidebarPanel(
     selectInput('time', 'Component Monetary Statement', names(df_surprises)),
-    dateRangeInput('date',
+    sliderInput('date',
                    label = 'GovC Meetings',
-                   start = df_surprises$`Press Release`$date[1] , 
-                   end = tail(df_surprises$`Press Release`$date[2],1)),
+                   min  = 2001, 
+                   max = 2023,
+                   value = 2005)
+                               
     ),
   mainPanel(
     plotOutput('plot1')
@@ -19,11 +21,14 @@ ui <- pageWithSidebar(
 
 server <- function(input, output, session) {
  
+
+  
    # Clean for time serie plotting
   
   dfInput <- reactive({time_serie_df %>% 
-    filter(id %in% input$time)})
-    #filter(date >= as.character(input$dateRange[1]) & date <= as.character(input$dateRange[2])) %>% 
+    filter(id %in% input$time) %>% 
+    filter(between(year(date),min(input$date),max(input$date)))})
+  
 
   # Plot:
   
@@ -31,6 +36,7 @@ server <- function(input, output, session) {
   output$plot1 <- renderPlot({
     df1 <- dfInput()
     df1 %>% 
+      
     ggplot(aes(date,value, fill=Factor)) +
     geom_col(width = 0.5) +
     labs(title="",

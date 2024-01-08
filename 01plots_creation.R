@@ -12,15 +12,28 @@ df_surprises <- names_list %>%
 
 # Figure: Monetary surprises over time: ----
 
+# Create df with whole monetary statement
+
+ms_df <- df_surprises %>%
+  bind_rows(.id = "id") %>%
+  filter(!date %in% c("2020-03-18","2022-06-15")) %>% 
+  mutate_at(vars(matches("Path|Timing|QE|Transmission")),as.numeric) %>% 
+  group_by(date) %>% 
+  summarise_at(vars(matches("Path|Timing|QE|Transmission")), sum) %>% 
+  mutate(id = "Monetary Statement") %>% 
+  select(id,everything())
+
+
 
 # Clean for time serie plotting
 
 time_serie_df <- df_surprises %>%
-  bind_rows(.id = "id") %>% 
-  mutate_at(vars(matches("Path|Timing|QE|Transmission")),as.numeric) %>% 
+  bind_rows(.id = "id") %>%
+  mutate_at(vars(matches("Path|Timing|QE|Transmission")),as.numeric) %>%
+  rbind(ms_df) %>% 
   pivot_longer(matches("Path|Timing|QE|Transmission"),names_to = "Factor") %>% 
   mutate(Factor = factor(Factor, levels = c("Timing","Path","QE","Transmission"))) %>% 
-  mutate(id = factor(id,levels= c("Press Release","Press Conference")))
+  mutate(id = factor(id,levels= c("Press Release","Press Conference","Monetary Statement")))
 
 # Plot:
 

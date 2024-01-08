@@ -13,7 +13,7 @@ ui <- pageWithSidebar(
                                
     ),
   mainPanel(
-    plotOutput('plot1')
+    plotlyOutput('plot1')
   )
 )
 
@@ -33,10 +33,9 @@ server <- function(input, output, session) {
   # Plot:
   
   
-  output$plot1 <- renderPlot({
+  output$plot1 <- renderPlotly({
     df1 <- dfInput()
-    df1 %>% 
-      
+    gg  <- df1 %>% 
     ggplot(aes(date,value, fill=Factor)) +
     geom_col(width = 0.5) +
     labs(title="",
@@ -59,6 +58,7 @@ and FR-DE) against German bunds around GovC meetings. The movements can be inter
            legend.text = element_text(size=14),
            strip.text = element_text(size = 20)) +
     theme(plot.caption = element_markdown(hjust = 0,size=12))
+    ggplotly(gg)
 })
 }
 

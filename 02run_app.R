@@ -9,7 +9,7 @@ ui <- pageWithSidebar(
                    label = 'GovC Meetings',
                    min  = 2001, 
                    max = 2023,
-                   value = 2005)
+                   value = c(2015,2018))
                                
     ),
   mainPanel(

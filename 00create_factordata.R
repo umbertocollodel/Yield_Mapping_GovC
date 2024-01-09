@@ -43,6 +43,7 @@
                  shinydashboard,
                  leaflet,
                  plotly,
+                 shinythemes,
                  install = TRUE, update = F)
   
   ##---------------------- Setup path  ------------------------------------------

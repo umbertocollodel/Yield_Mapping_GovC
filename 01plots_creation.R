@@ -35,6 +35,11 @@ time_serie_df <- df_surprises %>%
   mutate(Factor = factor(Factor, levels = c("Timing","Path","QE","Transmission"))) %>% 
   mutate(id = factor(id,levels= c("Press Release","Press Conference","Monetary Statement")))
 
+
+# Save the dataset:
+
+saveRDS(time_serie_df,"code/app/app_data/app_data.rds")
+
 # Plot:
 
 

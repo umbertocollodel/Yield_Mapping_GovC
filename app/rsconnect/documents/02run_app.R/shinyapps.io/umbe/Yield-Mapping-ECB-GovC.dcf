@@ -1,0 +1,12 @@
+name: Yield-Mapping-ECB-GovC
+title: Yield-Mapping-ECB-GovC
+username: umbe
+account: umbe
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 10888967
+bundleId: 8123701
+url: https://umbe.shinyapps.io/Yield-Mapping-ECB-GovC/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

@@ -1,3 +1,13 @@
+# Prepare the environment (libraries): 
+
+pkgs <- c("shiny","shinythemes","tidyverse","lubridate",
+               "plotly")
+
+lapply(pkgs, require, character.only = TRUE)
+
+
+
+
 # Start a shiny app showing the results
 
 
@@ -22,8 +32,7 @@ ui <- fluidPage(
     h5("Granularity: aggreggate plots all factors in a stacked bar chart. Individual focuses 
        on individual factors time series. If individual selected, a window appears with the different choices.
        "),
-    h5("Granularity: aggreggate plots all factors in a stacked bar chart. Individual focuses 
-       on individual factors time series. If individual selected, a window appears with the different choices.
+    h5("Time range:
        ")
     
     ),
@@ -39,7 +48,8 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
  
-
+  time_serie_df <- read_rds("app_data/app_data.rds")
+  
   
    # Clean for time serie plotting
   

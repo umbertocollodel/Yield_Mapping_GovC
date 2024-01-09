@@ -4,9 +4,14 @@
 ui <- pageWithSidebar(
   headerPanel('ECB Monetary Surprises'),
   sidebarPanel(
-    selectInput('time', 'Component Monetary Statement', names(df_surprises)),
+    selectInput('time', 'Component', unique(time_serie_df$id)),
+    radioButtons("granular","Granularity",c("Aggregate","Individual Factor")),
+      conditionalPanel(
+        condition = "input.granular == 'Individual Factor'",
+        selectInput("factor", "Factor", as.character(unique(time_serie_df$Factor)))
+      ),
     sliderInput('date',
-                   label = 'GovC Meetings',
+                   label = 'Time Range: GovC Meetings',
                    min  = 2001, 
                    max = 2023,
                    value = c(2015,2018))
@@ -26,9 +31,20 @@ server <- function(input, output, session) {
   
    # Clean for time serie plotting
   
-  dfInput <- reactive({time_serie_df %>% 
+  dfInput <- reactive({
+    if(input$granular == "Individual Factor"){
+    time_serie_df %>% 
     filter(id %in% input$time) %>% 
-    filter(between(year(date),min(input$date),max(input$date)))})
+    filter(Factor %in% input$factor) %>% 
+    filter(between(year(date),min(input$date),max(input$date)))
+      }
+    
+   else{
+      time_serie_df %>% 
+      filter(id %in% input$time) %>% 
+      filter(between(year(date),min(input$date),max(input$date)))}
+    }
+    )
   
 
   # Plot:
@@ -54,6 +70,7 @@ server <- function(input, output, session) {
            legend.position="bottom",
            legend.text = element_text(size=14),
            strip.text = element_text(size = 20)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
     theme(plot.caption = element_markdown(hjust = 0,size=12))
     ggplotly(gg)})
     

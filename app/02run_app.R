@@ -140,6 +140,6 @@ Source: Authors' calculation, Bloomberg, EA-MPD (Altavilla et al., 2019)
 Latest observation: 15 June 2023.")
 }
 
-
+# Run app: -----
 
 shinyApp(ui, server)

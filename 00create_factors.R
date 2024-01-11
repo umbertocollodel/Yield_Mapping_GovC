@@ -44,6 +44,7 @@ load_df <- fit %>%
  names(load_df[[2]]) <- c("Term","QE","Path","Timing")
  
 
+# Reshape for plotting:
 
 loadings_final_df <- load_df %>%
   bind_rows(.id="event") %>% 
@@ -59,7 +60,7 @@ saveRDS(loadings_final_df,"code/app/app_data/app_data_loadings.rds")
  
 # Figure: loadings OIS factor -----
 
-
+  loadings_final_df %>% 
   ggplot(aes(Term,value, group=event, col=event)) +
   geom_line(size=2) +
   facet_wrap(~Factor) +
@@ -94,62 +95,99 @@ saveRDS(loadings_final_df,"code/app/app_data/app_data_loadings.rds")
 
 # Calculate missing Timing, Path and QE (18th March 2020 and 15th June 2022) ----
  
-load_df_format <- load_df %>% 
-   map( ~ .x %>% pivot_longer(matches("Timing|Qe|Path"))) %>% 
-   map( ~ .x %>% select(-Term)) %>% 
-   map(~ .x %>% split(.$name)) %>% 
-   modify_depth(2,~ .x %>% pull(value)) %>% 
-   flatten()
+# create custom function to add special releases 
  
- missing_dates_pep <- c("18-2-2020","19-3-2020",
-                        "15-6-2022","16-6-2022")
+#' add_special_releases_risk_free
+#' @description function to add Timing,Path and QE factor for dates other than
+#' GoVC contained in initial file. Basically, it applies the weights of the factor
+#' decomposition to the new dates. Always use day of interest and next day.
+#' @param loadings_df df with loadings
+#' @param data_path path to new observations, character.
+#' @param missing_dates_data character vector with all dates to calculate change on (day and next day)
+#' @param n_dates numeric, number of new dates you interested into
+#' @param missing dates character vector only with dates interested (not next day)
+#' 
+#' @return list with Press Release and Press Conference factor extraction 
+#' ready to be added to original df. Transmission left as NA.
+#' 
+add_special_releases_risk_free <- function(loadings_df, data_path,
+                                           missing_dates_data,
+                                           n_dates, missing_dates){
  
- new_obs_pepp <- read_xlsx("raw_data/additional_releases.xlsx",sheet = 2) %>% 
-   rename(date = 1) %>%
-   mutate(date = str_replace_all(date,"/","-")) %>% 
-   filter(date %in% missing_dates_pep) %>% 
-   mutate_at(vars(matches("M|Y")),list(lag= ~ lag(.,1))) %>% 
-   slice(2,4) %>% 
-   mutate(`1M` = (`1M` - `1M_lag`)*100,
-          `3M` = (`3M` - `3M_lag`)*100,
-          `6M` = (`6M` - `6M_lag`)*100,
-          `1Y` = (`1Y` - `1Y_lag`)*100,
-          `2Y` = (`2Y` - `2Y_lag`)*100,
-          `5Y` = (`5Y` - `5Y_lag`)*100,
-          `10Y` = (`10Y` - `10Y_lag`)*100,
-          
-   ) %>% 
-   select(!contains("lag")) %>%
-   rename(`10YY`=`10Y`) %>% 
-   replicate(2,.,simplify = F) %>% 
-   map( ~ as.matrix(.))
- 
- names(new_obs_pepp) <- c("Press Release","Press Conference") 
- 
- pepp_obs <- new_obs_pepp %>%
-   map2(list(X_rel,X_con), ~ .y %>% rbind(.x)) %>%
-   map(~ .x %>% mutate_at(vars(matches("M|Y")),as.numeric)) %>%
-   map(~ .x %>% select(-date)) %>% 
-   map(~ scale(.x)) %>%
-   rep(each=3) %>%
-   map2(load_df_format, ~ .x %*% solve(cor(.x)) %*% .y) %>% 
-   map(~ .x %>% as_tibble() %>%  slice(nrow(.),nrow(.)-1)) %>% 
-   map2(rep(c("Path","QE","Timing"),2), ~ .x %>% setNames(.y)) %>% 
-   map(~ .x %>% mutate(date = c("2022-06-15","2020-03-18")))
- 
- names(pepp_obs) <- c(rep("Press Release",3),rep("Press Conference",3))
- 
- 
-pepp_obs_monetary <-  lapply(split(pepp_obs,names(pepp_obs)),do.call, what = "cbind") %>% 
-  map(~ .x %>% select(!contains("date"))) %>%
-  map(~ .x %>% rename_all(~ str_remove(., "Press Release\\."))) %>% 
-  map(~ .x %>% rename_all(~ str_remove(., "Press Conference\\."))) %>% 
-  map(~ .x %>% mutate(date = c("2022-06-15","2020-03-18"))) %>% 
-  .[c("Press Release","Press Conference")] %>% 
-  map(~ .x %>% mutate(Transmission = NA_integer_))
-
+  # Loadings dataframe in flat format: 
   
+  load_df_format <- load_df %>% 
+    map( ~ .x %>% pivot_longer(matches("Timing|Qe|Path"))) %>% 
+    map( ~ .x %>% select(-Term)) %>% 
+    map(~ .x %>% split(.$name)) %>% 
+    modify_depth(2,~ .x %>% pull(value)) %>% 
+    flatten()
+  
+  
+  # Calculate day-difference for components of risk-free curve for missin dates:
+  
+  new_obs <- read_xlsx(data_path,sheet = 2) %>% 
+    rename(date = 1) %>%
+    mutate(date = str_replace_all(date,"/","-")) %>% 
+    filter(date %in% missing_dates) %>% 
+    mutate_at(vars(matches("M|Y")),list(lag= ~ lag(.,1))) %>% 
+    slice(2,4) %>% 
+    mutate(`1M` = (`1M` - `1M_lag`)*100,
+           `3M` = (`3M` - `3M_lag`)*100,
+           `6M` = (`6M` - `6M_lag`)*100,
+           `1Y` = (`1Y` - `1Y_lag`)*100,
+           `2Y` = (`2Y` - `2Y_lag`)*100,
+           `5Y` = (`5Y` - `5Y_lag`)*100,
+           `10Y` = (`10Y` - `10Y_lag`)*100,
+           
+    ) %>% 
+    select(!contains("lag")) %>%
+    rename(`10YY`=`10Y`) %>% 
+    replicate(2,.,simplify = F) %>% 
+    map( ~ as.matrix(.))
+  
+  # Name of the new dataframes: 
+  
+  names(new_obs) <- c("Press Release","Press Conference") 
+  
+  
+  # Combine with complete df to rescale data, hence calculate factors:
+  new_obs_factor <- new_obs %>%
+    map2(list(X_rel,X_con), ~ .y %>% rbind(.x)) %>%
+    map(~ .x %>% mutate_at(vars(matches("M|Y")),as.numeric)) %>%
+    map(~ .x %>% select(-date)) %>% 
+    map(~ scale(.x)) %>%
+    rep(each=3) %>%
+    map2(load_df_format, ~ .x %*% solve(cor(.x)) %*% .y) %>% 
+    map(~ .x %>% as_tibble() %>%  slice(nrow(.),nrow(.)- 1)) %>% 
+    map2(rep(c("Path","QE","Timing"),n_dates), ~ .x %>% setNames(.y)) %>% 
+    map(~ .x %>% mutate(date = missing_dates))
+  
+  names(new_obs_factor) <- c(rep("Press Release",3),rep("Press Conference",3))
+  
+  # Reshape like original factor df:
+  
+  final_new_obs <-  lapply(split(new_obs_factor,names(new_obs_factor)),do.call, what = "cbind") %>% 
+    map(~ .x %>% select(!contains("date"))) %>%
+    map(~ .x %>% rename_all(~ str_remove(., "Press Release\\."))) %>% 
+    map(~ .x %>% rename_all(~ str_remove(., "Press Conference\\."))) %>% 
+    map(~ .x %>% mutate(date = missing_dates)) %>% 
+    .[c("Press Release","Press Conference")] %>% 
+    map(~ .x %>% mutate(Transmission = NA_integer_))
+  
+  return(final_new_obs)
+}
  
+ 
+ pepp_obs_monetary <- add_special_releases_risk_free(load_df,
+                                "raw_data/additional_releases.xlsx",
+                                c("18-2-2020","19-3-2020",
+                                  "15-6-2022","16-6-2022"),
+                                2,
+                                c("2022-06-15","2020-03-18")
+                                )
+ 
+
  
  
 # Performing PCA on spreads: -----

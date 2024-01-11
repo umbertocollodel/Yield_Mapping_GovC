@@ -44,20 +44,16 @@
                  leaflet,
                  plotly,
                  shinythemes,
+                 roxygen2,
                  install = TRUE, update = F)
   
   ##---------------------- Setup path  ------------------------------------------
   
   base_path <- getwd()
   
-  
-  ##-----------------------------------------------------------------------------
-  ## DON'T CHANGE THIS
-  
   r_path <- paste0(base_path, "/code/rcode/")
   s_path <- paste0(base_path, "/raw_data/")
-  d_path <- paste0(base_path, "/data/")
-  
+
 
   ##--------------------- Helper function  --------------------------------------
  # Takes a dataframe, removes some dates
@@ -80,32 +76,20 @@
     mutate(Date = as.Date(date))
   eampd_c <- read_xlsx(paste0(s_path,"00EA_MPD_update_july2023.xlsx"), sheet = 3) %>%
     mutate(Date = as.Date(date))
-  eampd_m <- read_xlsx(paste0(s_path,"00EA_MPD_update_july2023.xlsx"), sheet = 4) %>%
-    mutate(Date = as.Date(date))
   
   # OIS
   rois_rel  <- eampd_r %>% select("date", starts_with("OIS")) 
   rois_con  <- eampd_c %>% select("date", starts_with("OIS")) 
-  rois_tot  <- eampd_m %>% select("date", starts_with("OIS")) 
-  
+
   # Bund
   rbund_rel <- eampd_r %>% select("date", starts_with("DE")) 
   rbund_con <- eampd_c %>% select("date", starts_with("DE"))
-  rbund_tot <- eampd_m %>% select("date", starts_with("DE"))
-  
+
   # Bond
   rbond_rel <- eampd_r %>% select("date", starts_with("IT"),starts_with("FR"),starts_with("ES"))
   rbond_con <- eampd_c %>% select("date", starts_with("IT"),starts_with("FR"),starts_with("ES"))
-  rbond_tot <- eampd_m %>% select("date", starts_with("IT"),starts_with("FR"),starts_with("ES"))
-  
-  ## ---- Manual cleaning ---  
-  ## 2-Feb-2000 in ois release, 200bp change in some assets 
-  #rois_rel[rois_rel$Date == as.Date("2000-02-17"),] c(4,5, 6, 7, 12, 13)] <- 0 
-  ## ADDING 12 ##
-  #rois_tot[rois_rel$Date == as.Date("2000-02-17"), c(4,5, 6, 7, 12, 13)] <- 0 
-  ## ADDING 12 ##
-  
-  ## ---- select only median market-based surprises and clean dates  ------------
+
+  ## ---- Manual cleaning ------------
   
   ois_rel <- select_eampd_assets(rois_rel,exclude_date)
   ois_con <- select_eampd_assets(rois_con,exclude_date)
@@ -224,42 +208,7 @@
     as.character()
     
   
-  
-  write.table(
-    Xrel,
-    paste0(d_path, "Xrel.csv"),
-    sep = ",",
-    col.names = F,
-    row.names = F
-  )
-  write.table(
-    Xcon,
-    paste0(d_path, "Xcon.csv"),
-    sep = ",",
-    col.names = F,
-    row.names = F
-  )
-  write.table(
-    Drel,
-    paste0(d_path, "Drel.csv"),
-    sep = ",",
-    col.names = F,
-    row.names = F
-  )
-  write.table(
-    Dcon,
-    paste0(d_path, "Dcon.csv"),
-    sep = ",",
-    col.names = F,
-    row.names = F
-  )
-  write.table(
-    Dspread,
-    paste0(d_path, "Dspread.csv"),
-    sep = ",",
-    col.names = F,
-    row.names = F
-  )
+
   
   
 

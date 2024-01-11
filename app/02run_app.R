@@ -35,9 +35,12 @@ ui <- fluidPage(
                    min  = 2001, 
                    max = 2023,
                    value = c(2020,2023)),
-    h5("Component: press release calculates the difference between 13.15 and 13.45 values and extracts factors.
-       Press conference calculates the difference between 14.30 and 15.30 valus and extracts factors.
-       Monetary statetement combines the two."),
+    h5("Event: ECB governing council or other extraordinary release from ECB."),
+    h5("Component: press release refers to changes occured before/after the ECB GovC
+       press release. In the case of Special releases, it is based on the next day values.
+       Press conference refers to changes occured before/after the ECB GovC press
+       conference. Given that special releases are not followed by any conference,
+       the values are nought. Same reasonmentfor the whole onetary statement."),
     h5("Granularity: aggreggate plots all factors in a stacked bar chart. Individual focuses 
        on individual factors time series. If individual selected, a window appears with the different choices.
        "),

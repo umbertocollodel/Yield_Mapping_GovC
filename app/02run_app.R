@@ -54,7 +54,7 @@ server <- function(input, output, session) {
  
   
   
-   # Clean for time serie plotting
+   # Clean for time serie plotting -----
   
   dfInput <- reactive({
     if(input$granular == "Individual Factor"){
@@ -72,7 +72,7 @@ server <- function(input, output, session) {
     )
   
 
-  # Plot:
+  # Plot time serie factors: -----
   
   output$plot1 <- renderPlotly({
     df1 <- dfInput()
@@ -97,6 +97,8 @@ server <- function(input, output, session) {
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
     theme(plot.caption = element_markdown(hjust = 0,size=12))
     ggplotly(gg)})
+  
+  # Plot factor loadings: ----
   
   
   output$plot <- renderPlot(load_df %>%
@@ -127,7 +129,7 @@ server <- function(input, output, session) {
   )
   
 
-    
+# Methodological note: -----  
     
     output$note_plot <- renderText("The model decomposes movements in OIS (1m, 3m, 6m, 1y, 2y, 5y, 10y) into three policy factors: downward-sloping (Timing), hump-shaped (Path) and upward-sloping (QE). It takes three principal components  
 from the variation in yields around GovC meetings (Press Release and Press Conference), rotates and scales them. An additional model employs the same methodology for the variation of 10 years spreads (IT-DE, SP-DE   

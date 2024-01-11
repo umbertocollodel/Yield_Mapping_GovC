@@ -1,4 +1,4 @@
-# Prepare the environment (libraries): 
+# Prepare the environment (libraries and data):  ----
 
 
 Vectorize(require)(package = c("shiny", "ggplot2", "dplyr", "tidyr",
@@ -12,7 +12,7 @@ time_serie_df <- readRDS("app_data/app_data.rds") %>%
   rename( sd = value)
 
 
-# Start a shiny app showing the results
+# UI ----
 
 
 ui <- fluidPage(
@@ -48,7 +48,7 @@ ui <- fluidPage(
   )
 )
 
-
+# Server ------
 
 server <- function(input, output, session) {
  

@@ -1,16 +1,20 @@
 # Prepare the environment (libraries and data):  ----
 
-
+# Packages: ----
 Vectorize(require)(package = c("shiny", "ggplot2", "dplyr", "tidyr",
                                "lubridate","plotly","shinythemes",
                                "shinydashboard","ggtext"), character.only = TRUE)
 
 
+# Factor decomposition dataframe:
 
 time_serie_df <- readRDS("app_data/app_data.rds") %>% 
   mutate(value = round(value,2)) %>% 
   rename( sd = value)
 
+# Loadings dataframe:
+
+loadings_df <- readRDS("app_data/app_data_loadings.rds")
 
 # UI ----
 
@@ -42,7 +46,7 @@ ui <- fluidPage(
     ),
   mainPanel(
     plotlyOutput('plot1'),
-    plotOutput("plot"),
+    plotlyOutput("plot"),
     textOutput("note_plot",)
   
   )
@@ -101,12 +105,8 @@ server <- function(input, output, session) {
   # Plot factor loadings: ----
   
   
-  output$plot <- renderPlot(load_df %>%
-    bind_rows(.id="event") %>% 
-    mutate(Term = factor(Term, levels = c("1M","3M","6M","1Y","2Y","5Y","10YY"))) %>% 
-    pivot_longer(matches("Path|QE|Timing"),names_to = "Factor") %>% 
-    mutate(Factor = factor(Factor, levels = c("Timing","Path","QE"))) %>% 
-    mutate(event= factor(event,levels=c("Press Release","Press Conference"))) %>% 
+  output$plot <- renderPlotly({
+    gg1 <- loadings_df %>% 
     ggplot(aes(Term,value, group=event, col=event)) +
     geom_line(size=2) +
     facet_wrap(~Factor) +
@@ -124,9 +124,9 @@ server <- function(input, output, session) {
            legend.text = element_text(size=14),
            # The new stuff
            strip.text = element_text(size = 20)) +
-    theme(plot.caption = element_markdown(hjust = 0,size=12)),
-    height = 350, width = 1113.5
-  )
+    theme(axis.text.x = element_text(angle = 270, hjust = 1)) +
+    theme(plot.caption = element_markdown(hjust = 0,size=12)) 
+    ggplotly(gg1)})
   
 
 # Methodological note: -----  

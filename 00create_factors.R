@@ -45,16 +45,21 @@ load_df <- fit %>%
  
 
 
- 
-# Figure: loadings OIS factor -----
-
-
-load_df %>%
+loadings_final_df <- load_df %>%
   bind_rows(.id="event") %>% 
   mutate(Term = factor(Term, levels = c("1M","3M","6M","1Y","2Y","5Y","10YY"))) %>% 
   pivot_longer(matches("Path|QE|Timing"),names_to = "Factor") %>% 
   mutate(Factor = factor(Factor, levels = c("Timing","Path","QE"))) %>% 
-  mutate(event= factor(event,levels=c("Press Release","Press Conference"))) %>% 
+  mutate(event= factor(event,levels=c("Press Release","Press Conference"))) 
+
+# Save:
+
+saveRDS(loadings_final_df,"code/app/app_data/app_data_loadings.rds")
+
+ 
+# Figure: loadings OIS factor -----
+
+
   ggplot(aes(Term,value, group=event, col=event)) +
   geom_line(size=2) +
   facet_wrap(~Factor) +

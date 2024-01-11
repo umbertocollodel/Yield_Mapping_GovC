@@ -1,11 +1,15 @@
 # Prepare the environment (libraries): 
 
-pkgs <- c("shiny","shinythemes","tidyverse","lubridate",
-               "plotly")
 
-lapply(pkgs, require, character.only = TRUE)
+Vectorize(require)(package = c("shiny", "ggplot2", "dplyr", "tidyr",
+                               "lubridate","plotly","shinythemes",
+                               "shinydashboard","ggtext"), character.only = TRUE)
 
 
+
+time_serie_df <- readRDS("app_data/app_data.rds") %>% 
+  mutate(value = round(value,2)) %>% 
+  rename( sd = value)
 
 
 # Start a shiny app showing the results
@@ -25,14 +29,14 @@ ui <- fluidPage(
                    label = 'Time Range: GovC Meetings',
                    min  = 2001, 
                    max = 2023,
-                   value = c(2015,2018)),
-    h5("Component: Press release calculates the difference between 13.15 and 13.45 values and extracts factors.
+                   value = c(2020,2023)),
+    h5("Component: press release calculates the difference between 13.15 and 13.45 values and extracts factors.
        Press conference calculates the difference between 14.30 and 15.30 valus and extracts factors.
        Monetary statetement combines the two."),
     h5("Granularity: aggreggate plots all factors in a stacked bar chart. Individual focuses 
        on individual factors time series. If individual selected, a window appears with the different choices.
        "),
-    h5("Time range:
+    h5("Time range: year range for all ECB Governing Council meetings.
        ")
     
     ),
@@ -48,7 +52,6 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
  
-  time_serie_df <- read_rds("app_data/app_data.rds")
   
   
    # Clean for time serie plotting
@@ -74,7 +77,7 @@ server <- function(input, output, session) {
   output$plot1 <- renderPlotly({
     df1 <- dfInput()
     gg  <- df1 %>% 
-      ggplot(aes(date,value, fill=Factor)) +
+      ggplot(aes(date,sd, fill=Factor)) +
       geom_col(width = 0.5) +
       labs(title="",
            y="Standard Deviation",

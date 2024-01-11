@@ -95,6 +95,12 @@ saveRDS(loadings_final_df,"code/app/app_data/app_data_loadings.rds")
 
 # Calculate missing Timing, Path and QE (18th March 2020 and 15th June 2022) ----
  
+# Set missing dates:
+
+missing_dates = c("2022-06-15","2020-03-18")
+
+
+
 # create custom function to add special releases 
  
 #' add_special_releases_risk_free
@@ -288,7 +294,10 @@ df_surprises <- fit %>%
    map2(pepp_obs_monetary,~ rbind(.x,.y)) %>% 
    map( ~ .x %>% group_by(date)) %>%
    map( ~ .x %>% summarise(across(everything(), ~ .[!is.na(.)][1]))) %>% 
-   map( ~ .x %>% ungroup())
+   map( ~ .x %>% ungroup()) %>% 
+   map( ~ .x %>% mutate(special = ifelse(date %in% missing_dates,"Special Release","GovC"))) 
+   
+   
  
  
 # Save intermediate data: -------

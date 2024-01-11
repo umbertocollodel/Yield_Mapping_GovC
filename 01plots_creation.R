@@ -21,7 +21,8 @@ ms_df <- df_surprises %>%
   group_by(date) %>% 
   summarise_at(vars(matches("Path|Timing|QE|Transmission")), sum) %>% 
   mutate(id = "Monetary Statement") %>% 
-  select(id,everything())
+  select(id,everything()) %>% 
+  mutate(special = ifelse(date %in% missing_dates,"Special Release","GovC"))
 
 
 

@@ -18,6 +18,7 @@ ms_df <- df_surprises %>%
   bind_rows(.id = "id") %>%
   filter(!date %in% c("2020-03-18","2022-06-15")) %>% 
   mutate_at(vars(matches("Path|Timing|QE|Transmission")),as.numeric) %>% 
+  mutate_at(vars(matches("Path|Timing|QE|Transmission")), ~ ifelse(id=="Press Conference" & date %in% missing_dates,0,.x)) %>% 
   group_by(date) %>% 
   summarise_at(vars(matches("Path|Timing|QE|Transmission")), sum) %>% 
   mutate(id = "Monetary Statement") %>% 
@@ -31,10 +32,11 @@ ms_df <- df_surprises %>%
 time_serie_df <- df_surprises %>%
   bind_rows(.id = "id") %>%
   mutate_at(vars(matches("Path|Timing|QE|Transmission")),as.numeric) %>%
+  mutate_at(vars(matches("Path|Timing|QE|Transmission")), ~ ifelse(id=="Press Conference" & date %in% missing_dates,0,.x)) %>% 
   rbind(ms_df) %>% 
   pivot_longer(matches("Path|Timing|QE|Transmission"),names_to = "Factor") %>% 
   mutate(Factor = factor(Factor, levels = c("Timing","Path","QE","Transmission"))) %>% 
-  mutate(id = factor(id,levels= c("Press Release","Press Conference","Monetary Statement")))
+  mutate(id = factor(id,levels= c("Press Release","Press Conference","Monetary Statement"))) 
 
 
 # Save the dataset:

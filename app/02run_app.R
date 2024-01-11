@@ -23,6 +23,7 @@ ui <- fluidPage(
   theme = shinytheme("superhero"),
   headerPanel('ECB Monetary Surprises'),
   sidebarPanel(
+    selectInput('event','Event', c("All","GovC","Special Release")),
     selectInput('time', 'Component', unique(time_serie_df$id)),
     radioButtons("granular","Granularity",c("Aggregate","Individual Factor")),
       conditionalPanel(
@@ -30,7 +31,7 @@ ui <- fluidPage(
         selectInput("factor", "Factor", as.character(unique(time_serie_df$Factor)))
       ),
     sliderInput('date',
-                   label = 'Time Range: GovC Meetings',
+                   label = 'Time Range',
                    min  = 2001, 
                    max = 2023,
                    value = c(2020,2023)),
@@ -61,18 +62,40 @@ server <- function(input, output, session) {
    # Clean for time serie plotting -----
   
   dfInput <- reactive({
-    if(input$granular == "Individual Factor"){
-    time_serie_df %>% 
-    filter(id %in% input$time) %>% 
-    filter(Factor %in% input$factor) %>% 
-    filter(between(year(date),min(input$date),max(input$date)))
+    
+    if(input$event == "All"){
+      if(input$granular == "Individual Factor"){
+          time_serie_df %>% 
+          filter(id %in% input$time) %>% 
+          filter(Factor %in% input$factor) %>% 
+          filter(between(year(date),min(input$date),max(input$date)))
       }
     
-   else{
+      else{
+     
       time_serie_df %>% 
       filter(id %in% input$time) %>% 
       filter(between(year(date),min(input$date),max(input$date)))}
     }
+    
+    else{
+      if(input$granular == "Individual Factor"){
+          time_serie_df %>% 
+          filter(special %in% input$event) %>% 
+          filter(id %in% input$time) %>% 
+          filter(Factor %in% input$factor) %>% 
+          filter(between(year(date),min(input$date),max(input$date)))
+      }
+      
+      else{
+        time_serie_df %>% 
+          filter(special %in% input$event) %>% 
+          filter(id %in% input$time) %>% 
+          filter(between(year(date),min(input$date),max(input$date)))}
+    }
+  }
+  
+  
     )
   
 

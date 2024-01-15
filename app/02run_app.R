@@ -35,6 +35,7 @@ ui <- fluidPage(
                    min  = 2001, 
                    max = 2023,
                    value = c(2020,2023)),
+    downloadButton("download","Download Data"),
     h5("Event: ECB governing council or other extraordinary release from ECB."),
     h5("Component: press release refers to changes occured before/after the ECB GovC
        press release. In the case of Special releases, it is based on the next day values.
@@ -164,8 +165,19 @@ and FR-DE) against German bunds around GovC meetings. The movements can be inter
 Source: Authors' calculation, Bloomberg, EA-MPD (Altavilla et al., 2019)  
 
 Latest observation: 15 June 2023.")
-}
 
+# Download tab: ----
+
+output$download <- downloadHandler(
+  filename = function() {
+    paste("monetary_surprises-", Sys.Date(), ".csv", sep = "")
+  },
+  content = function(file) {
+    write.csv(dfInput(), file)
+  }
+)
+
+}
 # Run app: -----
 
 shinyApp(ui, server)

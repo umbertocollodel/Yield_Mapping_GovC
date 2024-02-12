@@ -21,7 +21,7 @@ loadings_df <- readRDS("app_data/app_data_loadings.rds")
 
 ui <- fluidPage(
   theme = shinytheme("superhero"),
-  headerPanel('ECB Monetary Surprises'),
+  headerPanel('Policy Pulse: Tracking ECB Monetary Policy Surprises in Real-Time'),
   sidebarPanel(
     selectInput('event','Event', c("All","GovC","Special Release")),
     selectInput('time', 'Component', unique(time_serie_df$id)),
@@ -108,8 +108,8 @@ server <- function(input, output, session) {
   output$plot1 <- renderPlotly({
     df1 <- dfInput()
     gg  <- df1 %>% 
-      ggplot(aes(date,sd, fill=Factor)) +
-      geom_col(width = 0.5) +
+      ggplot(aes(as.Date(date),sd, fill=Factor)) +
+      geom_col() +
       labs(title="",
            y="Standard Deviation",
            x="",
@@ -135,7 +135,7 @@ server <- function(input, output, session) {
   output$plot <- renderPlotly({
     gg1 <- loadings_df %>% 
     ggplot(aes(Term,value, group=event, col=event)) +
-    geom_line(size=2) +
+    geom_line(size=0.8) +
     facet_wrap(~Factor) +
     labs(title="",
          col="",

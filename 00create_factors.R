@@ -116,9 +116,11 @@ missing_dates = c("2022-06-15","2020-03-18")
 #' @return list with Press Release and Press Conference factor extraction 
 #' ready to be added to original df. Transmission left as NA.
 #' 
-add_special_releases_risk_free <- function(loadings_df, data_path,
+add_special_releases_risk_free <- function(loadings_df, 
+                                           data_path,
                                            missing_dates_data,
-                                           n_dates, missing_dates){
+                                           n_dates, 
+                                           missing_dates){
  
   # Loadings dataframe in flat format: 
   

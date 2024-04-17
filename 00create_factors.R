@@ -190,9 +190,10 @@ add_special_releases_risk_free <- function(loadings_df,
  pepp_obs_monetary <- add_special_releases_risk_free(load_df,
                                 "raw_data/additional_releases.xlsx",
                                 c("18-2-2020","19-3-2020",
-                                  "15-6-2022","16-6-2022"),
-                                2,
-                                c("2022-06-15","2020-03-18")
+                                  "15-6-2022","16-6-2022",
+                                  "11-04-2024","12-04-2024"),
+                                3,
+                                c("2024-04-11","2022-06-15","2020-03-18")
                                 )
  
 

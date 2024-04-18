@@ -136,17 +136,17 @@ add_special_releases_risk_free <- function(loadings_df,
   
   new_obs <- read_xlsx(data_path,sheet = 2) %>% 
     rename(date = 1) %>%
-    mutate(date = str_replace_all(date,"/","-")) %>% 
-    filter(date %in% missing_dates) %>% 
+    mutate(date = convert_to_date(date, character_fun = lubridate::dmy)) %>%
+    filter(date %in% missing_dates_data) %>% 
     mutate_at(vars(matches("M|Y")),list(lag= ~ lag(.,1))) %>% 
-    slice(2,4) %>% 
-    mutate(`1M` = (`1M` - `1M_lag`)*100,
-           `3M` = (`3M` - `3M_lag`)*100,
-           `6M` = (`6M` - `6M_lag`)*100,
-           `1Y` = (`1Y` - `1Y_lag`)*100,
-           `2Y` = (`2Y` - `2Y_lag`)*100,
-           `5Y` = (`5Y` - `5Y_lag`)*100,
-           `10Y` = (`10Y` - `10Y_lag`)*100,
+    slice(2,4,6) %>% 
+    mutate(`1M` = -(`1M` - `1M_lag`)*100,
+           `3M` = -(`3M` - `3M_lag`)*100,
+           `6M` = -(`6M` - `6M_lag`)*100,
+           `1Y` = -(`1Y` - `1Y_lag`)*100,
+           `2Y` = -(`2Y` - `2Y_lag`)*100,
+           `5Y` = -(`5Y` - `5Y_lag`)*100,
+           `10Y`= -(`10Y` - `10Y_lag`)*100,
            
     ) %>% 
     select(!contains("lag")) %>%
@@ -157,7 +157,6 @@ add_special_releases_risk_free <- function(loadings_df,
   # Name of the new dataframes: 
   
   names(new_obs) <- c("Press Release","Press Conference") 
-  
   
   # Combine with complete df to rescale data, hence calculate factors:
   new_obs_factor <- new_obs %>%
@@ -189,9 +188,9 @@ add_special_releases_risk_free <- function(loadings_df,
  
  pepp_obs_monetary <- add_special_releases_risk_free(load_df,
                                 "raw_data/additional_releases.xlsx",
-                                c("18-2-2020","19-3-2020",
-                                  "15-6-2022","16-6-2022",
-                                  "11-04-2024","12-04-2024"),
+                                c("2020-02-18","2020-02-19",
+                                  "2022-06-15","2022-06-16",
+                                  "2024-04-11","2024-04-12"),
                                 3,
                                 c("2024-04-11","2022-06-15","2020-03-18")
                                 )

@@ -167,8 +167,9 @@ add_special_releases_risk_free <- function(loadings_df,
     rep(each=3) %>%
     map2(load_df_format, ~ .x %*% solve(cor(.x)) %*% .y) %>% 
     map(~ .x %>% as_tibble() %>%  slice_tail(n = n_dates))  %>% 
-    map2(rep(c("Path","QE","Timing"),n_dates), ~ .x %>% setNames(.y)) %>% 
+    map2(rep(c("Path","QE","Timing"),2), ~ .x %>% setNames(.y)) %>% 
     map(~ .x %>% mutate(date = missing_dates))
+  
   
   names(new_obs_factor) <- c(rep("Press Release",3),rep("Press Conference",3))
   

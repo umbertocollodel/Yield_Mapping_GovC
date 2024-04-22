@@ -101,11 +101,12 @@ missing_dates = c("2022-06-15","2020-03-18")
 
 
 
-# create custom function to add special releases 
+# Create custom function to calculate and add new GovC risk-free factors to
+# pre-existing dataframe (or any other special release for that matters)
  
-#' add_special_releases_risk_free
+#' add_risk_free
 #' @description function to add Timing,Path and QE factor for dates other than
-#' GoVC contained in initial file. Basically, it applies the weights of the factor
+#' initial GoVC meetings. Basically, it applies the weights of the factor
 #' decomposition to the new dates. Always use day of interest and next day.
 #' @param loadings_df df with loadings
 #' @param data_path path to new observations, character.
@@ -116,11 +117,11 @@ missing_dates = c("2022-06-15","2020-03-18")
 #' @return list with Press Release and Press Conference factor extraction 
 #' ready to be added to original df. Transmission left as NA.
 #' 
-add_special_releases_risk_free <- function(loadings_df, 
-                                           data_path,
-                                           missing_dates_data,
-                                           n_dates, 
-                                           missing_dates){
+add_risk_free <- function(loadings_df, 
+                          data_path,
+                          missing_dates_data,
+                          n_dates, 
+                          missing_dates){
  
   # Loadings dataframe in flat format: 
   
@@ -187,7 +188,7 @@ add_special_releases_risk_free <- function(loadings_df,
 }
  
  
- pepp_obs_monetary <- add_special_releases_risk_free(load_df,
+ new_risk_free <- add_risk_free(load_df,
                                 "raw_data/additional_releases.xlsx",
                                 c("2020-02-18","2020-02-19",
                                   "2022-06-15","2022-06-16",
@@ -294,7 +295,7 @@ df_surprises <- fit %>%
  
  
  df_surprises <- df_surprises %>% 
-   map2(pepp_obs_monetary,~ rbind(.x,.y)) %>% 
+   map2(new_risk_free,~ rbind(.x,.y)) %>% 
    map( ~ .x %>% group_by(date)) %>%
    map( ~ .x %>% summarise(across(everything(), ~ .[!is.na(.)][1]))) %>% 
    map( ~ .x %>% ungroup()) %>% 

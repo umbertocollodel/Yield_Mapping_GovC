@@ -33,8 +33,8 @@ ui <- fluidPage(
     sliderInput('date',
                    label = 'Time Range',
                    min  = 2001, 
-                   max = 2023,
-                   value = c(2020,2023)),
+                   max = 2024,
+                   value = c(2020,2024)),
     downloadButton("download","Download Data"),
     h5("Event: ECB governing council or other extraordinary release from ECB."),
     h5("Component: press release refers to changes occured before/after the ECB GovC

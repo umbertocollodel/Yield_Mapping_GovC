@@ -160,13 +160,13 @@ add_special_releases_risk_free <- function(loadings_df,
   
   # Combine with complete df to rescale data, hence calculate factors:
   new_obs_factor <- new_obs %>%
-    map2(list(X_rel,X_con), ~ .y %>% rbind(.x)) %>%
+    map2(list(X_rel,X_con), ~ .y %>% rbind(.x)) %>% 
     map(~ .x %>% mutate_at(vars(matches("M|Y")),as.numeric)) %>%
     map(~ .x %>% select(-date)) %>% 
     map(~ scale(.x)) %>%
     rep(each=3) %>%
     map2(load_df_format, ~ .x %*% solve(cor(.x)) %*% .y) %>% 
-    map(~ .x %>% as_tibble() %>%  slice(nrow(.),nrow(.)- 1)) %>% 
+    map(~ .x %>% as_tibble() %>%  slice_tail(n = n_dates))  %>% 
     map2(rep(c("Path","QE","Timing"),n_dates), ~ .x %>% setNames(.y)) %>% 
     map(~ .x %>% mutate(date = missing_dates))
   
@@ -193,7 +193,7 @@ add_special_releases_risk_free <- function(loadings_df,
                                   "2024-04-11","2024-04-12"),
                                 3,
                                 c("2024-04-11","2022-06-15","2020-03-18")
-                                )
+                                ) 
  
 
  

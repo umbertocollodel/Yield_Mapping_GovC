@@ -107,7 +107,33 @@ server <- function(input, output, session) {
   
   output$plot1 <- renderPlotly({
     df1 <- dfInput()
+    
+    # Check if the selected characteristic is not the combined individual factors
+    if (input$granular == "Individual Factor"){
     gg  <- df1 %>% 
+      ggplot(aes(as.Date(date),sd, fill=Factor)) +
+      geom_col() +
+      geom_hline(yintercept = 1, col = "red", linetype = "dashed") +
+      geom_hline(yintercept = -1, col = "red", linetype = "dashed") +
+      labs(title="",
+           y="Standard Deviation",
+           x="",
+           fill="",
+           caption = "") +  
+      theme_bw() +
+      theme(plot.caption = element_text(hjust=0)) +
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+      scale_fill_manual(values=c("#35BBCA","#0191B4","#D3DD18","#FE7A15")) +
+      theme( axis.text = element_text( size = 14 ),
+             axis.text.x = element_text( size = 20 ),
+             axis.title = element_text( size = 16 ),
+             legend.position="bottom",
+             legend.text = element_text(size=14),
+             strip.text = element_text(size = 20)) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    theme(plot.caption = element_markdown(hjust = 0,size=12))
+    } else {
+    gg <- df1 %>% 
       ggplot(aes(as.Date(date),sd, fill=Factor)) +
       geom_col() +
       labs(title="",
@@ -127,7 +153,9 @@ server <- function(input, output, session) {
              strip.text = element_text(size = 20)) +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
     theme(plot.caption = element_markdown(hjust = 0,size=12))
-    ggplotly(gg)})
+    }
+    ggplotly(gg)}
+    )
   
   # Plot factor loadings: ----
   

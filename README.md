@@ -40,9 +40,11 @@ and example of how the function is now running
 
 In the app folder, 02run_app deploys the app with the new observations on local machine.
 
-The app looks as below and is self-describing:
+The app looks as below and a description is embedded:
 
 <img width="941" alt="Screenshot 2024-06-24 120047" src="https://github.com/umbertocollodel/Yield_Mapping_GovC/assets/33840988/4f838dcb-211f-4f6b-b253-efab3f66bf4d">
+
+Resulting files and images can be exported easily.
 
 
 ## License

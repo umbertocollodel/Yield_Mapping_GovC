@@ -22,12 +22,10 @@ R
 0.0_create_factordata Cleans data from EA-MPD (Altavilla,2019) to prepare for factor extraction.
 The code retrieves EA-MPD data from a raw_data directory. 
 
-<img width="305" alt="Screenshot 2024-07-04 141346" src="https://github.com/umbertocollodel/Yield_Mapping_GovC/assets/33840988/9b0e8e33-cbaa-4c2f-9a22-4f903c5ae8f2">
-
 0.0create_factor Calculates factors scorers and loadings for EA-MPD and extends the methodology to new GovC observations.
 To do so, you need to
 
-1) insert the new data manually in the additional_relesase excel workbook
+1) insert the new data manually in the additional_relesase excel workbook, with day and following day
 
 <img width="305" alt="Screenshot 2024-07-04 141346" src="https://github.com/umbertocollodel/Yield_Mapping_GovC/assets/33840988/9b0e8e33-cbaa-4c2f-9a22-4f903c5ae8f2">
 
